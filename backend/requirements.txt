@@ -1,0 +1,23 @@
+# Banana Blog - 技术科普绘本生成器
+# Python 依赖
+
+# Web 框架
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# LLM 集成
+langchain>=1.0.0
+langchain-openai>=1.0.0
+langchain-google-genai>=1.0.0
+
+# LangGraph 工作流引擎 (博客生成)
+langgraph>=1.0.0
+
+# 模板引擎 (Prompt 管理)
+jinja2>=3.1.0
+
+# 环境变量
+python-dotenv>=1.0.1
+
+# 数据验证
+pydantic>=2.0.0

@@ -1,0 +1,272 @@
+"""
+Prompt 管理器 - 使用 Jinja2 模板管理 Prompt
+"""
+
+import os
+import logging
+from typing import Any, Dict, Optional
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+logger = logging.getLogger(__name__)
+
+# 模板目录
+TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates')
+
+
+class PromptManager:
+    """
+    Prompt 管理器 - 使用 Jinja2 模板渲染 Prompt
+    """
+    
+    _instance: Optional['PromptManager'] = None
+    
+    def __init__(self, templates_dir: str = None):
+        """
+        初始化 Prompt 管理器
+        
+        Args:
+            templates_dir: 模板目录路径
+        """
+        self.templates_dir = templates_dir or TEMPLATES_DIR
+        
+        # 初始化 Jinja2 环境
+        self.env = Environment(
+            loader=FileSystemLoader(self.templates_dir),
+            autoescape=select_autoescape(['html', 'xml']),
+            trim_blocks=True,
+            lstrip_blocks=True,
+        )
+        
+        # 添加自定义过滤器
+        self.env.filters['truncate'] = self._truncate
+        self.env.filters['tojson'] = self._tojson
+        
+        logger.info(f"Prompt 管理器初始化完成，模板目录: {self.templates_dir}")
+    
+    @classmethod
+    def get_instance(cls, templates_dir: str = None) -> 'PromptManager':
+        """
+        获取单例实例
+        
+        Args:
+            templates_dir: 模板目录路径
+            
+        Returns:
+            PromptManager 实例
+        """
+        if cls._instance is None:
+            cls._instance = cls(templates_dir)
+        return cls._instance
+    
+    def _truncate(self, text: str, length: int = 500, end: str = '...') -> str:
+        """截断文本"""
+        if not text:
+            return ''
+        if len(text) <= length:
+            return text
+        return text[:length] + end
+    
+    def _tojson(self, obj: Any, indent: int = None) -> str:
+        """转换为 JSON 字符串"""
+        import json
+        return json.dumps(obj, ensure_ascii=False, indent=indent)
+    
+    def render(self, template_name: str, **kwargs) -> str:
+        """
+        渲染模板
+        
+        Args:
+            template_name: 模板名称 (不含 .j2 后缀)
+            **kwargs: 模板变量
+            
+        Returns:
+            渲染后的字符串
+        """
+        # 自动添加 .j2 后缀
+        if not template_name.endswith('.j2'):
+            template_name = f"{template_name}.j2"
+        
+        try:
+            template = self.env.get_template(template_name)
+            return template.render(**kwargs)
+        except Exception as e:
+            logger.error(f"模板渲染失败 [{template_name}]: {e}")
+            raise
+    
+    def render_researcher(
+        self,
+        topic: str,
+        search_depth: str = "medium",
+        target_audience: str = "intermediate",
+        search_results: list = None
+    ) -> str:
+        """渲染 Researcher Prompt"""
+        return self.render(
+            'researcher',
+            topic=topic,
+            search_depth=search_depth,
+            target_audience=target_audience,
+            search_results=search_results or []
+        )
+    
+    def render_search_query(
+        self,
+        topic: str,
+        target_audience: str = "intermediate"
+    ) -> str:
+        """渲染搜索查询 Prompt"""
+        return self.render(
+            'search_query',
+            topic=topic,
+            target_audience=target_audience
+        )
+    
+    def render_planner(
+        self,
+        topic: str,
+        article_type: str = "tutorial",
+        target_audience: str = "intermediate",
+        target_length: str = "medium",
+        background_knowledge: str = None,
+        key_concepts: list = None
+    ) -> str:
+        """渲染 Planner Prompt"""
+        return self.render(
+            'planner',
+            topic=topic,
+            article_type=article_type,
+            target_audience=target_audience,
+            target_length=target_length,
+            background_knowledge=background_knowledge,
+            key_concepts=key_concepts or []
+        )
+    
+    def render_writer(
+        self,
+        section_outline: dict,
+        previous_section_summary: str = None,
+        next_section_preview: str = None,
+        background_knowledge: str = None
+    ) -> str:
+        """渲染 Writer Prompt"""
+        return self.render(
+            'writer',
+            section_outline=section_outline,
+            previous_section_summary=previous_section_summary,
+            next_section_preview=next_section_preview,
+            background_knowledge=background_knowledge
+        )
+    
+    def render_writer_enhance(
+        self,
+        original_content: str,
+        vague_points: list
+    ) -> str:
+        """渲染 Writer 增强 Prompt"""
+        return self.render(
+            'writer_enhance',
+            original_content=original_content,
+            vague_points=vague_points or []
+        )
+    
+    def render_coder(
+        self,
+        code_description: str,
+        context: str,
+        language: str = "python",
+        complexity: str = "medium"
+    ) -> str:
+        """渲染 Coder Prompt"""
+        return self.render(
+            'coder',
+            code_description=code_description,
+            context=context,
+            language=language,
+            complexity=complexity
+        )
+    
+    def render_artist(
+        self,
+        image_type: str,
+        description: str,
+        context: str
+    ) -> str:
+        """渲染 Artist Prompt"""
+        return self.render(
+            'artist',
+            image_type=image_type,
+            description=description,
+            context=context
+        )
+    
+    def render_questioner(
+        self,
+        section_content: str,
+        section_outline: dict,
+        depth_requirement: str = "medium"
+    ) -> str:
+        """渲染 Questioner Prompt"""
+        return self.render(
+            'questioner',
+            section_content=section_content,
+            section_outline=section_outline,
+            depth_requirement=depth_requirement
+        )
+    
+    def render_reviewer(
+        self,
+        document: str,
+        outline: dict
+    ) -> str:
+        """渲染 Reviewer Prompt"""
+        return self.render(
+            'reviewer',
+            document=document,
+            outline=outline
+        )
+    
+    def render_assembler_header(
+        self,
+        title: str,
+        subtitle: str,
+        reading_time: int,
+        core_value: str,
+        table_of_contents: list,
+        introduction: str
+    ) -> str:
+        """渲染文章头部"""
+        return self.render(
+            'assembler_header',
+            title=title,
+            subtitle=subtitle,
+            reading_time=reading_time,
+            core_value=core_value,
+            table_of_contents=table_of_contents or [],
+            introduction=introduction
+        )
+    
+    def render_assembler_footer(
+        self,
+        summary_points: list,
+        next_steps: str,
+        reference_links: list
+    ) -> str:
+        """渲染文章尾部"""
+        return self.render(
+            'assembler_footer',
+            summary_points=summary_points or [],
+            next_steps=next_steps or '',
+            reference_links=reference_links or []
+        )
+
+
+# 全局实例
+_prompt_manager: Optional[PromptManager] = None
+
+
+def get_prompt_manager() -> PromptManager:
+    """获取 Prompt 管理器实例"""
+    global _prompt_manager
+    if _prompt_manager is None:
+        _prompt_manager = PromptManager()
+    return _prompt_manager

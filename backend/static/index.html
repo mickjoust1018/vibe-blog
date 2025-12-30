@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍌 Banana Vibe Blog - 技术Vibe博客Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Markdown 渲染库 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 代码高亮 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/json.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/sql.min.js"></script>
+    <!-- Mermaid 图表渲染 -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <!-- 导出图片 -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 50%, #eeeeee 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .bg-animation {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+        }
+        .bg-animation::before {
+            content: '';
+            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at 20% 80%, rgba(255, 107, 53, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.15) 0%, transparent 50%);
+            animation: bgMove 20s ease-in-out infinite;
+        }
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-1%, 3%); }
+        }
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 40px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .logo span {
+            font-size: 24px; font-weight: 700;
+            background: linear-gradient(135deg, #FF6B35, #FFD166);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { color: rgba(0,0,0,0.6); text-decoration: none; font-size: 14px; }
+        .nav-links a:hover { color: #000; }
+        .hero { text-align: center; padding: 50px 20px 30px; }
+        .hero h1 {
+            font-size: 42px; font-weight: 700; margin-bottom: 12px;
+            background: linear-gradient(135deg, #FF6B35, #4ECDC4);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p { font-size: 16px; color: rgba(0,0,0,0.6); }
+        .main-card {
+            max-width: 1000px; margin: 30px auto; padding: 24px;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab {
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 10px;
+            color: rgba(0,0,0,0.6);
+            font-size: 14px; cursor: pointer;
+        }
+        .tab.active {
+            background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,209,102,0.15));
+            border-color: rgba(255,107,53,0.8);
+            color: #FF6B35;
+        }
+        .input-wrapper {
+            position: relative;
+            background: rgba(255,255,255,0.95);
+            border-radius: 14px;
+            padding: 16px;
+            border: none;
+            z-index: 1;
+        }
+        .input-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(90deg, 
+                #3b82f6, #8b5cf6, #ec4899, #f97316, #eab308, #22c55e, #3b82f6);
+            background-size: 400% 100%;
+            border-radius: 16px;
+            z-index: -1;
+            animation: borderGlow 6s linear infinite;
+            filter: blur(4px);
+            opacity: 0.7;
+        }
+        .input-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.95);
+            border-radius: 14px;
+            z-index: -1;
+        }
+        @keyframes borderGlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 400% 50%; }
+        }
+        .input-wrapper:focus-within::before {
+            opacity: 1;
+            filter: blur(6px);
+        }
+        .text-input {
+            width: 100%; background: transparent; border: none;
+            color: #333; font-size: 15px; resize: none;
+            min-height: 80px; outline: none; font-family: inherit;
+        }
+        .text-input::placeholder { color: rgba(0,0,0,0.3); }
+        .options-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 16px; padding-top: 16px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            flex-wrap: wrap; gap: 12px;
+        }
+        .option-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+        .option-tag {
+            padding: 8px 14px;
+            background: rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 18px;
+            font-size: 13px; color: rgba(0,0,0,0.7);
+            cursor: pointer;
+        }
+        .option-tag.active {
+            background: rgba(78,205,196,0.2);
+            border-color: rgba(78,205,196,0.5);
+            color: #4ECDC4;
+        }
+        .create-btn {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            border: none; border-radius: 10px;
+            color: #fff; font-size: 15px; font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(78,205,196,0.3);
+        }
+        .create-btn:hover { transform: translateY(-2px); }
+        .create-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* 进度面板 */
+        .progress-panel {
+            display: none;
+            max-width: 1000px;
+            margin: 30px auto;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(245,245,245,0.95));
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .progress-panel.show { display: block; }
+        .progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 20px;
+            background: rgba(0,0,0,0.02);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .progress-title {
+            font-size: 16px; font-weight: 600;
+            color: #4ECDC4;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .close-btn {
+            width: 32px; height: 32px;
+            background: rgba(0,0,0,0.05);
+            border: none; border-radius: 8px;
+            color: #333; font-size: 18px;
+            cursor: pointer;
+        }
+        .export-progress-btn {
+            width: 32px; height: 32px;
+            background: rgba(78,205,196,0.1);
+            border: 1px solid rgba(78,205,196,0.3);
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .export-progress-btn:hover {
+            background: rgba(78,205,196,0.2);
+            border-color: rgba(78,205,196,0.5);
+        }
+        .progress-body {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        .progress-item {
+            background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(245,245,245,0.5));
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            border-left: 3px solid #4ECDC4;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .progress-item .time {
+            font-size: 11px; color: #999; margin-bottom: 4px;
+        }
+        .progress-item .message {
+            font-size: 14px; color: #333;
+        }
+        .progress-item .detail {
+            font-size: 13px; color: #666;
+            margin-top: 8px; padding: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            white-space: pre-wrap;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .progress-item.success { border-left-color: #4ECDC4; }
+        .progress-item.error { border-left-color: #ff6b6b; }
+        .progress-item.stream { border-left-color: #FFD166; }
+        .progress-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 20px;
+            background: rgba(0,0,0,0.02);
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+        .progress-status {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .status-badge {
+            padding: 6px 14px;
+            background: rgba(78,205,196,0.2);
+            border-radius: 20px;
+            font-size: 13px; color: #4ECDC4;
+        }
+        .stop-btn {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+            border: none; border-radius: 8px;
+            color: #fff; font-size: 13px;
+            cursor: pointer;
+        }
+        .dots {
+            display: inline-block;
+            animation: dots 1.5s infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        .dots::after { content: '...'; animation: dots 1.5s infinite; }
+
+        /* 结果区域 */
+        .result-section {
+            display: none;
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0;
+        }
+        .result-section.show { display: block; }
+        .result-card {
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(0,0,0,0.1);
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .result-header {
+            padding: 20px 24px;
+            background: rgba(0,0,0,0.02);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .result-title { font-size: 20px; font-weight: 600; color: #333; }
+        .result-meta { 
+            display: flex; 
+            gap: 8px; 
+            margin-top: 8px; 
+            flex-wrap: wrap;
+        }
+        .meta-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .meta-tag.sections { background: rgba(78,205,196,0.15); color: #2a9d8f; }
+        .meta-tag.code { background: rgba(255,107,53,0.15); color: #e85d04; }
+        .meta-tag.images { background: rgba(138,43,226,0.15); color: #7b2cbf; }
+        .meta-tag.score { background: rgba(34,197,94,0.15); color: #16a34a; }
+        .result-pages { padding: 20px; }
+        .page-item {
+            background: rgba(0,0,0,0.02);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .page-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .page-number {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #FF6B35, #FFD166);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 14px; color: #fff;
+        }
+        .page-title { font-size: 16px; font-weight: 600; color: #333; }
+        .page-content { color: rgba(0,0,0,0.7); line-height: 1.8; margin-bottom: 14px; font-size: 14px; }
+        .page-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .page-tag {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .page-tag.metaphor { background: rgba(78,205,196,0.1); border: 1px solid rgba(78,205,196,0.3); color: #4ECDC4; }
+        .page-tag.tech { background: rgba(255,107,53,0.1); border: 1px solid rgba(255,107,53,0.3); color: #FF6B35; }
+        .page-tag.example { background: rgba(255,209,102,0.1); border: 1px solid rgba(255,209,102,0.3); color: #FFD166; }
+        .page-takeaway {
+            padding: 10px 14px;
+            background: rgba(78,205,196,0.1);
+            border-left: 3px solid #4ECDC4;
+            border-radius: 0 8px 8px 0;
+            font-size: 13px; color: rgba(0,0,0,0.7);
+            margin-bottom: 12px;
+        }
+        .page-image { margin-top: 14px; border-radius: 12px; overflow: hidden; }
+        .page-image img { width: 100%; height: auto; }
+
+        /* Markdown 渲染样式 */
+        .markdown-body {
+            color: rgba(0,0,0,0.8);
+            line-height: 1.8;
+            font-size: 15px;
+            max-height: 700px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 {
+            color: #333;
+            margin: 24px 0 12px 0;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 8px;
+        }
+        .markdown-body h1 { font-size: 28px; }
+        .markdown-body h2 { font-size: 22px; }
+        .markdown-body h3 { font-size: 18px; }
+        .markdown-body h4 { font-size: 16px; }
+        .markdown-body p { margin: 12px 0; }
+        .markdown-body ul, .markdown-body ol {
+            margin: 12px 0;
+            padding-left: 24px;
+        }
+        .markdown-body li { margin: 6px 0; }
+        .markdown-body blockquote {
+            margin: 16px 0;
+            padding: 12px 20px;
+            background: rgba(78,205,196,0.1);
+            border-left: 4px solid #4ECDC4;
+            border-radius: 0 8px 8px 0;
+            color: rgba(0,0,0,0.7);
+        }
+        .markdown-body code {
+            background: rgba(0,0,0,0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Monaco', monospace;
+            font-size: 13px;
+            color: #FF6B35;
+        }
+        .markdown-body pre {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 16px;
+            margin: 16px 0;
+            overflow-x: auto;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .markdown-body pre code {
+            background: transparent;
+            padding: 0;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .markdown-body a {
+            color: #4ECDC4;
+            text-decoration: none;
+        }
+        .markdown-body a:hover { text-decoration: underline; }
+        .markdown-body img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin: 16px 0;
+        }
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        .markdown-body th, .markdown-body td {
+            border: 1px solid rgba(0,0,0,0.1);
+            padding: 10px 14px;
+            text-align: left;
+        }
+        .markdown-body th {
+            background: rgba(0,0,0,0.05);
+            font-weight: 600;
+        }
+        .markdown-body hr {
+            border: none;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            margin: 24px 0;
+        }
+        .markdown-body .mermaid {
+            background: rgba(0,0,0,0.02);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+        }
+        /* 滚动条样式 */
+        .markdown-body::-webkit-scrollbar { width: 6px; }
+        .markdown-body::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 3px; }
+        .markdown-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 3px; }
+        .markdown-body::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+
+        /* 示例卡片 */
+        .examples-section { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .section-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; color: #333; }
+        .examples-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+        .example-card {
+            background: rgba(255,255,255,0.8);
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .example-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255,107,53,0.5);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        .example-image {
+            height: 140px;
+            background: linear-gradient(135deg, #f5f5f5, #eeeeee);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px;
+        }
+        .example-content { padding: 16px; }
+        .example-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: #333; }
+        .example-desc { font-size: 12px; color: rgba(0,0,0,0.5); }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 15px 20px; }
+            .nav-links { display: none; }
+            .hero h1 { font-size: 28px; }
+            .main-card { margin: 20px; padding: 18px; }
+            .options-bar { flex-direction: column; }
+            .create-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <nav class="navbar">
+        <div class="logo"><span>🍌 Banana Vibe Blog</span></div>
+        <div class="nav-links">
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>让技术变得人人都能懂</h1>
+        <p>基于Multi-Agent 架构的 AI 长文博客生成器<br>深度调研 · 智能配图 · 一键生成</p>
+    </section>
+
+    <div class="main-card">
+        <div class="tabs">
+            <div class="tab active" data-tab="blog">📝 长文博客</div>
+        </div>
+        <div class="input-wrapper">
+            <textarea class="text-input" id="contentInput" placeholder="输入技术主题，如：LangGraph 入门教程、Redis 性能优化..."></textarea>
+        </div>
+        <!-- 长文博客选项 -->
+        <div class="options-bar" id="blogOptions">
+            <div class="option-tags">
+                <div class="option-tag active" data-article-type="tutorial">📚 教程型</div>
+                <div class="option-tag" data-article-type="problem-solution">🔧 问题解决</div>
+                <div class="option-tag" data-article-type="comparison">⚖️ 对比分析</div>
+                <div class="option-tag active" data-length="short">📄 短文</div>
+                <div class="option-tag" data-length="medium">📑 中等</div>
+                <div class="option-tag" data-length="long">📖 长文</div>
+            </div>
+            <button class="create-btn" id="createBlogBtn">✨ 生成博客</button>
+        </div>
+    </div>
+
+    <!-- 进度面板 -->
+    <div class="progress-panel" id="progressPanel">
+        <div class="progress-header">
+            <div class="progress-title">✨ AI 工作状态</div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="export-progress-btn" id="exportProgressBtn" title="导出为图片">📷</button>
+                <button class="close-btn" id="closeProgress">×</button>
+            </div>
+        </div>
+        <div class="progress-body" id="progressBody"></div>
+        <div class="progress-footer">
+            <div class="progress-status">
+                <div class="status-badge" id="statusBadge">准备中</div>
+                <span id="progressText">等待开始</span>
+            </div>
+            <button class="stop-btn" id="stopBtn">■ 停止</button>
+        </div>
+    </div>
+
+    <!-- 结果区域 -->
+    <section class="result-section" id="resultSection">
+        <div class="result-card">
+            <div class="result-header">
+                <div class="result-title" id="resultTitle">生成结果</div>
+                <div class="result-meta" id="resultMeta"></div>
+            </div>
+            <div class="result-pages" id="resultPages"></div>
+        </div>
+    </section>
+
+    <!-- 示例区域 -->
+    <section class="examples-section" id="examples">
+        <h2 class="section-title">🔥 热门示例</h2>
+        <div class="examples-grid">
+            <div class="example-card" data-content="Redis 是一个开源的、基于内存的数据结构存储系统，可以用作数据库、缓存和消息中间件。它支持多种数据结构，如字符串、哈希、列表、集合、有序集合等。Redis 的最大特点是速度快，因为数据存储在内存中，读写速度可以达到每秒 10 万次以上。">
+                <div class="example-image">🏪</div>
+                <div class="example-content">
+                    <div class="example-title">Redis 入门</div>
+                    <div class="example-desc">用便利店的比喻，让你秒懂 Redis 缓存原理</div>
+                </div>
+            </div>
+            <div class="example-card" data-content="消息队列是一种应用程序间的通信方法，允许应用程序通过发送和接收消息来进行异步通信。生产者将消息发送到队列，消费者从队列中获取消息进行处理。消息队列的主要优点包括：解耦、异步处理、削峰填谷、可靠性保证等。">
+                <div class="example-image">📦</div>
+                <div class="example-content">
+                    <div class="example-title">消息队列原理</div>
+                    <div class="example-desc">快递驿站的故事，理解消息队列的异步魔法</div>
+                </div>
+            </div>
+            <div class="example-card" data-content="分布式锁是控制分布式系统之间同步访问共享资源的一种方式。在分布式系统中，多个进程可能同时访问同一个资源，为了保证数据的一致性，需要使用分布式锁来协调。">
+                <div class="example-image">🔒</div>
+                <div class="example-content">
+                    <div class="example-title">分布式锁详解</div>
+                    <div class="example-desc">公共厕所的锁，秒懂分布式锁的精髓</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let selectedPages = 5;
+        let generateImages = false;
+        let currentTab = 'transform';
+        let currentTaskId = null;
+        let eventSource = null;
+        
+        // 长文博客选项
+        let articleType = 'tutorial';
+        let targetLength = 'short';
+
+        // Tab 切换
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentTab = tab.dataset.tab;
+                
+                // 切换选项栏和占位符
+                const transformOptions = document.getElementById('transformOptions');
+                const blogOptions = document.getElementById('blogOptions');
+                
+                if (currentTab === 'transform') {
+                    transformOptions.style.display = 'flex';
+                    blogOptions.style.display = 'none';
+                    document.getElementById('contentInput').placeholder = '粘贴技术博客内容，AI 将转化为通俗易懂的科普绘本...';
+                } else if (currentTab === 'blog') {
+                    transformOptions.style.display = 'none';
+                    blogOptions.style.display = 'flex';
+                    document.getElementById('contentInput').placeholder = '输入技术主题，如：LangGraph 入门教程、Redis 性能优化...';
+                } else {
+                    transformOptions.style.display = 'flex';
+                    blogOptions.style.display = 'none';
+                    document.getElementById('contentInput').placeholder = '描述你想要生成的图片...';
+                }
+            });
+        });
+
+        // 选项切换
+        document.querySelectorAll('.option-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                if (tag.dataset.pages) {
+                    document.querySelectorAll('.option-tag[data-pages]').forEach(t => t.classList.remove('active'));
+                    tag.classList.add('active');
+                    selectedPages = parseInt(tag.dataset.pages);
+                } else if (tag.dataset.images) {
+                    tag.classList.toggle('active');
+                    generateImages = tag.classList.contains('active');
+                } else if (tag.dataset.articleType) {
+                    document.querySelectorAll('.option-tag[data-article-type]').forEach(t => t.classList.remove('active'));
+                    tag.classList.add('active');
+                    articleType = tag.dataset.articleType;
+                } else if (tag.dataset.length) {
+                    document.querySelectorAll('.option-tag[data-length]').forEach(t => t.classList.remove('active'));
+                    tag.classList.add('active');
+                    targetLength = tag.dataset.length;
+                } else {
+                    tag.classList.toggle('active');
+                }
+            });
+        });
+
+        // 示例卡片点击
+        document.querySelectorAll('.example-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.getElementById('contentInput').value = card.dataset.content;
+                document.querySelector('.main-card').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // 添加进度项
+        function addProgressItem(message, type = 'info', detail = '') {
+            const body = document.getElementById('progressBody');
+            const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+            const item = document.createElement('div');
+            item.className = `progress-item ${type}`;
+            item.innerHTML = `
+                <div class="time">${time}</div>
+                <div class="message">${message}</div>
+                ${detail ? `<div class="detail">${detail}</div>` : ''}
+            `;
+            body.appendChild(item);
+            body.scrollTop = body.scrollHeight;
+        }
+
+        // 更新流式内容
+        function updateStreamItem(content) {
+            const body = document.getElementById('progressBody');
+            let streamItem = body.querySelector('.progress-item.stream:last-child');
+            if (!streamItem || !streamItem.classList.contains('streaming')) {
+                streamItem = document.createElement('div');
+                streamItem.className = 'progress-item stream streaming';
+                streamItem.innerHTML = `
+                    <div class="time">${new Date().toLocaleTimeString('zh-CN', { hour12: false })}</div>
+                    <div class="message">📝 大纲生成中<span class="dots"></span></div>
+                    <div class="detail"></div>
+                `;
+                body.appendChild(streamItem);
+            }
+            streamItem.querySelector('.detail').textContent = content;
+            body.scrollTop = body.scrollHeight;
+        }
+
+        // 完成流式
+        function finishStream() {
+            const streamItem = document.querySelector('.progress-item.streaming');
+            if (streamItem) {
+                streamItem.classList.remove('streaming');
+                streamItem.classList.add('success');
+                streamItem.querySelector('.message').innerHTML = '📝 大纲生成完成';
+            }
+        }
+
+        // 关闭进度面板
+        document.getElementById('closeProgress').addEventListener('click', () => {
+            document.getElementById('progressPanel').classList.remove('show');
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+        });
+
+        // 导出进度面板为图片
+        document.getElementById('exportProgressBtn').addEventListener('click', async () => {
+            const panel = document.getElementById('progressPanel');
+            const progressBody = document.getElementById('progressBody');
+            const btn = document.getElementById('exportProgressBtn');
+            const originalText = btn.textContent;
+            
+            try {
+                btn.textContent = '⏳';
+                btn.disabled = true;
+                
+                // 临时移除滚动限制以捕获完整内容
+                progressBody.style.cssText = 'max-height: none !important; overflow: visible !important;';
+                
+                // 临时为进度项设置与页面一致的样式（确保 html2canvas 能正确渲染）
+                const progressItems = progressBody.querySelectorAll('.progress-item');
+                progressItems.forEach(item => {
+                    // 保存原始内联样式
+                    item.dataset.originalStyle = item.getAttribute('style') || '';
+                    // 获取计算后的边框颜色
+                    const computedStyle = window.getComputedStyle(item);
+                    const borderColor = computedStyle.borderLeftColor;
+                    // 设置与页面一致的样式
+                    item.style.background = '#f8f9fa';
+                    item.style.borderLeft = `3px solid ${borderColor}`;
+                    item.style.borderRadius = '12px';
+                    item.style.padding = '12px 16px';
+                    item.style.marginBottom = '10px';
+                });
+                
+                // 设置文字颜色为黑色
+                const timeElements = progressBody.querySelectorAll('.progress-item .time');
+                const messageElements = progressBody.querySelectorAll('.progress-item .message');
+                const detailElements = progressBody.querySelectorAll('.progress-item .detail');
+                
+                timeElements.forEach(el => {
+                    el.dataset.originalStyle = el.getAttribute('style') || '';
+                    el.style.color = '#666';
+                });
+                messageElements.forEach(el => {
+                    el.dataset.originalStyle = el.getAttribute('style') || '';
+                    el.style.color = '#333';
+                });
+                detailElements.forEach(el => {
+                    el.dataset.originalStyle = el.getAttribute('style') || '';
+                    el.style.color = '#444';
+                });
+                
+                // 等待样式生效
+                await new Promise(r => setTimeout(r, 150));
+                
+                // 使用 html2canvas 截图
+                const canvas = await html2canvas(panel, {
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true,
+                    scrollX: 0,
+                    scrollY: 0
+                });
+                
+                // 恢复进度项样式
+                progressItems.forEach(item => {
+                    const originalStyle = item.dataset.originalStyle;
+                    if (originalStyle) {
+                        item.setAttribute('style', originalStyle);
+                    } else {
+                        item.removeAttribute('style');
+                    }
+                });
+                
+                // 恢复文字样式
+                timeElements.forEach(el => {
+                    const originalStyle = el.dataset.originalStyle;
+                    if (originalStyle) {
+                        el.setAttribute('style', originalStyle);
+                    } else {
+                        el.removeAttribute('style');
+                    }
+                });
+                messageElements.forEach(el => {
+                    const originalStyle = el.dataset.originalStyle;
+                    if (originalStyle) {
+                        el.setAttribute('style', originalStyle);
+                    } else {
+                        el.removeAttribute('style');
+                    }
+                });
+                detailElements.forEach(el => {
+                    const originalStyle = el.dataset.originalStyle;
+                    if (originalStyle) {
+                        el.setAttribute('style', originalStyle);
+                    } else {
+                        el.removeAttribute('style');
+                    }
+                });
+                
+                // 恢复样式
+                progressBody.style.cssText = '';
+                
+                // 转换为图片并下载
+                const link = document.createElement('a');
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+                link.download = `AI工作状态_${timestamp}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                btn.textContent = '✅';
+                setTimeout(() => { btn.textContent = originalText; }, 1500);
+            } catch (e) {
+                console.error('导出失败:', e);
+                btn.textContent = '❌';
+                setTimeout(() => { btn.textContent = originalText; }, 1500);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // 停止按钮
+        document.getElementById('stopBtn').addEventListener('click', () => {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+            addProgressItem('⏹️ 已停止生成', 'error');
+            document.getElementById('statusBadge').textContent = '已停止';
+        });
+
+        // 长文博客生成按钮
+        document.getElementById('createBlogBtn').addEventListener('click', async () => {
+            const topic = document.getElementById('contentInput').value.trim();
+            if (!topic) {
+                alert('请输入技术主题');
+                return;
+            }
+
+            // 显示进度面板
+            const progressPanel = document.getElementById('progressPanel');
+            const progressBody = document.getElementById('progressBody');
+            progressBody.innerHTML = '';
+            progressPanel.classList.add('show');
+            document.getElementById('statusBadge').textContent = '准备中';
+            document.getElementById('progressText').textContent = '正在创建博客生成任务...';
+
+            try {
+                // 创建长文博客生成任务
+                const response = await fetch('/api/blog/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        topic: topic,
+                        article_type: articleType,
+                        target_audience: 'intermediate',
+                        target_length: targetLength
+                    })
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    addProgressItem(`❌ 创建任务失败: ${data.error}`, 'error');
+                    return;
+                }
+
+                currentTaskId = data.task_id;
+                addProgressItem(`✅ 博客生成任务已创建: ${currentTaskId}`);
+
+                // 订阅 SSE
+                eventSource = new EventSource(`/api/tasks/${currentTaskId}/stream`);
+
+                eventSource.addEventListener('connected', (e) => {
+                    addProgressItem('🔗 已连接到服务器');
+                    document.getElementById('statusBadge').textContent = '运行中';
+                });
+
+                eventSource.addEventListener('progress', (e) => {
+                    const d = JSON.parse(e.data);
+                    const icon = getStageIcon(d.stage);
+                    addProgressItem(`${icon} ${d.message}`, d.stage === 'error' ? 'error' : 'info');
+                    document.getElementById('progressText').textContent = d.message;
+                });
+
+                // 监听后端日志
+                eventSource.addEventListener('log', (e) => {
+                    const d = JSON.parse(e.data);
+                    const logger = d.logger || '';
+                    const message = d.message || '';
+                    
+                    // 根据日志来源添加不同图标
+                    let icon = '📝';
+                    if (logger === 'generator') icon = '⚙️';
+                    else if (logger === 'researcher') icon = '🔍';
+                    else if (logger === 'planner') icon = '📋';
+                    else if (logger === 'writer') icon = '✍️';
+                    else if (logger === 'questioner') icon = '❓';
+                    else if (logger === 'coder') icon = '💻';
+                    else if (logger === 'artist') icon = '🎨';
+                    else if (logger === 'reviewer') icon = '✅';
+                    else if (logger === 'assembler') icon = '📦';
+                    else if (logger === 'search_service') icon = '🌐';
+                    else if (logger === 'blog_service') icon = '🖼️';
+                    
+                    // 判断是否为成功消息
+                    const isSuccess = message.includes('完成') || message.includes('成功');
+                    addProgressItem(`${icon} ${message}`, isSuccess ? 'success' : 'info');
+                    
+                    // 更新底部状态栏
+                    document.getElementById('progressText').textContent = message;
+                });
+
+                eventSource.addEventListener('complete', (e) => {
+                    const d = JSON.parse(e.data);
+                    addProgressItem('🎉 博客生成完成！', 'success');
+                    document.getElementById('statusBadge').textContent = '已完成';
+                    document.getElementById('progressText').textContent = '生成完成';
+                    
+                    // 显示博客结果
+                    displayBlogResult(d);
+                    
+                    eventSource.close();
+                    eventSource = null;
+                });
+
+                eventSource.addEventListener('error', (e) => {
+                    if (e.data) {
+                        const d = JSON.parse(e.data);
+                        addProgressItem(`❌ 错误: ${d.message}`, 'error');
+                    }
+                    document.getElementById('statusBadge').textContent = '错误';
+                });
+
+                eventSource.onerror = () => {
+                    if (eventSource && eventSource.readyState === EventSource.CLOSED) {
+                        addProgressItem('🔌 连接已关闭');
+                    }
+                };
+
+            } catch (error) {
+                addProgressItem(`❌ 请求失败: ${error.message}`, 'error');
+            }
+        });
+
+        // 获取阶段图标
+        function getStageIcon(stage) {
+            const icons = {
+                'start': '🚀',
+                'researcher': '🔍',
+                'planner': '📋',
+                'writer': '✍️',
+                'questioner': '❓',
+                'deepen_content': '📚',
+                'coder': '💻',
+                'artist': '🎨',
+                'reviewer': '✅',
+                'revision': '🔄',
+                'assembler': '📦'
+            };
+            return icons[stage] || '⚙️';
+        }
+
+        // 保存当前博客结果用于下载
+        let currentBlogResult = null;
+
+        // 显示博客结果
+        function displayBlogResult(result) {
+            currentBlogResult = result;
+            
+            document.getElementById('resultTitle').textContent = result.outline?.title || '技术博客';
+            document.getElementById('resultMeta').innerHTML = `
+                <span class="meta-tag sections">📚 ${result.sections_count || 0} 章节</span>
+                <span class="meta-tag code">💻 ${result.code_blocks_count || 0} 代码块</span>
+                <span class="meta-tag images">🎨 ${result.images_count || 0} 配图</span>
+                <span class="meta-tag score">⭐ 评分 ${result.review_score || 0}</span>
+            `;
+
+            const pagesContainer = document.getElementById('resultPages');
+            pagesContainer.innerHTML = '';
+
+            // 显示 Markdown 内容
+            if (result.markdown) {
+                const markdownEl = document.createElement('div');
+                markdownEl.className = 'page-item';
+                markdownEl.innerHTML = `
+                    <div class="page-header">
+                        <div class="page-number">📄</div>
+                        <div class="page-title">完整博客内容</div>
+                        <div style="margin-left: auto; display: flex; gap: 10px;">
+                            <button class="download-btn" onclick="exportMarkdownAsImage()" style="padding: 8px 16px; background: linear-gradient(135deg, #FF6B35, #FF8E53); border: none; border-radius: 8px; color: #fff; font-size: 13px; cursor: pointer;">
+                                📷 导出图片
+                            </button>
+                            <button class="download-btn" onclick="downloadMarkdown()" style="padding: 8px 16px; background: linear-gradient(135deg, #4ECDC4, #44A08D); border: none; border-radius: 8px; color: #fff; font-size: 13px; cursor: pointer;">
+                                📥 下载 Markdown
+                            </button>
+                        </div>
+                    </div>
+                    <div class="markdown-body" id="markdownContent"></div>
+                `;
+                pagesContainer.appendChild(markdownEl);
+                
+                // 使用 marked.js 渲染 Markdown
+                renderMarkdown(result.markdown);
+                
+                // 显示保存路径
+                if (result.saved_path) {
+                    addProgressItem(`📁 已自动保存到: ${result.saved_path}`, 'success');
+                }
+            }
+
+            document.getElementById('resultSection').classList.add('show');
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // 渲染 Markdown 内容
+        function renderMarkdown(markdown) {
+            // 预处理：修复图片路径（将 ./images/ 转换为 /outputs/images/）
+            let processedMarkdown = markdown.replace(/\]\(\.\/images\//g, '](/outputs/images/');
+            
+            // 预处理：确保分割线 --- 前后有空行（避免被解析为标题）
+            processedMarkdown = processedMarkdown.replace(/([^\n])\n---/g, '$1\n\n---');
+            processedMarkdown = processedMarkdown.replace(/---\n([^\n])/g, '---\n\n$1');
+            
+            // 配置 marked
+            marked.setOptions({
+                highlight: function(code, lang) {
+                    if (lang && hljs.getLanguage(lang)) {
+                        try {
+                            return hljs.highlight(code, { language: lang }).value;
+                        } catch (e) {}
+                    }
+                    return code;
+                },
+                breaks: true,
+                gfm: true
+            });
+            
+            // 渲染 Markdown
+            const container = document.getElementById('markdownContent');
+            container.innerHTML = marked.parse(processedMarkdown);
+            
+            // 渲染 Mermaid 图表
+            setTimeout(async () => {
+                const mermaidBlocks = container.querySelectorAll('pre code.language-mermaid');
+                console.log('找到 Mermaid 代码块:', mermaidBlocks.length);
+                
+                if (typeof mermaid === 'undefined' || mermaidBlocks.length === 0) return;
+                
+                // 初始化 Mermaid
+                mermaid.initialize({ 
+                    startOnLoad: false,
+                    theme: 'default',
+                    securityLevel: 'loose',
+                    flowchart: {
+                        htmlLabels: true,
+                        useMaxWidth: true,
+                        curve: 'basis'
+                    }
+                });
+                
+                // 逐个渲染 Mermaid 图表
+                for (let i = 0; i < mermaidBlocks.length; i++) {
+                    const block = mermaidBlocks[i];
+                    let code = block.textContent;
+                    
+                    // 清理特殊引号
+                    code = code.replace(/[""'']/g, '"');
+                    
+                    const div = document.createElement('div');
+                    div.className = 'mermaid';
+                    div.id = 'mermaid-' + i;
+                    
+                    try {
+                        const { svg } = await mermaid.render('mermaid-graph-' + i, code);
+                        div.innerHTML = svg;
+                        block.parentElement.replaceWith(div);
+                        console.log('Mermaid 图表 ' + i + ' 渲染成功');
+                    } catch (e) {
+                        console.warn('Mermaid 图表 ' + i + ' 渲染失败:', e.message);
+                        // 渲染失败时显示原始代码
+                        div.innerHTML = '<pre style="background:#fff3cd;padding:10px;border-radius:5px;"><code>' + code + '</code></pre><p style="color:#856404;font-size:12px;">⚠️ 图表渲染失败</p>';
+                        block.parentElement.replaceWith(div);
+                    }
+                }
+            }, 200);
+        }
+
+        // 下载 Markdown
+        function downloadMarkdown() {
+            if (!currentBlogResult || !currentBlogResult.markdown) {
+                alert('没有可下载的内容');
+                return;
+            }
+            
+            const title = currentBlogResult.outline?.title || 'blog';
+            const safeTitle = title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '_').substring(0, 50);
+            const filename = `${safeTitle}_${new Date().toISOString().slice(0, 10)}.md`;
+            
+            const blob = new Blob([currentBlogResult.markdown], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // 导出 Markdown 预览为图片
+        async function exportMarkdownAsImage() {
+            const markdownContent = document.getElementById('markdownContent');
+            if (!markdownContent) {
+                alert('没有可导出的内容');
+                return;
+            }
+            
+            const title = currentBlogResult?.outline?.title || 'blog';
+            const safeTitle = title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '_').substring(0, 50);
+            const filename = `${safeTitle}_${new Date().toISOString().slice(0, 10)}.png`;
+            
+            // 找到按钮并显示加载状态
+            const btns = document.querySelectorAll('.download-btn');
+            let btn = null;
+            btns.forEach(b => { if (b.textContent.includes('导出图片')) btn = b; });
+            const originalText = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.innerHTML = '⏳ 导出中...';
+                btn.disabled = true;
+            }
+            
+            try {
+                // 临时移除滚动限制以捕获完整内容
+                const originalMaxHeight = markdownContent.style.maxHeight;
+                const originalOverflow = markdownContent.style.overflow;
+                markdownContent.style.maxHeight = 'none';
+                markdownContent.style.overflow = 'visible';
+                
+                // 使用 html2canvas 截图（白色背景）
+                const canvas = await html2canvas(markdownContent, {
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false
+                });
+                
+                // 恢复样式
+                markdownContent.style.maxHeight = originalMaxHeight;
+                markdownContent.style.overflow = originalOverflow;
+                
+                // 下载图片
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                if (btn) {
+                    btn.innerHTML = '✅ 已导出';
+                    setTimeout(() => { btn.innerHTML = originalText; }, 1500);
+                }
+            } catch (e) {
+                console.error('导出失败:', e);
+                alert('导出失败: ' + e.message);
+                if (btn) btn.innerHTML = originalText;
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        // HTML 转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 生成按钮点击
+        document.getElementById('createBtn').addEventListener('click', async () => {
+            const content = document.getElementById('contentInput').value.trim();
+            if (!content) {
+                alert('请输入内容');
+                return;
+            }
+
+            // 显示进度面板
+            const progressPanel = document.getElementById('progressPanel');
+            const progressBody = document.getElementById('progressBody');
+            progressBody.innerHTML = '';
+            progressPanel.classList.add('show');
+            document.getElementById('statusBadge').textContent = '准备中';
+            document.getElementById('progressText').textContent = '正在创建任务...';
+
+            try {
+                // 创建任务
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: content,
+                        page_count: selectedPages,
+                        target_audience: '技术小白',
+                        style: '可爱卡通风',
+                        generate_images: generateImages
+                    })
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    addProgressItem(`❌ 创建任务失败: ${data.error}`, 'error');
+                    return;
+                }
+
+                currentTaskId = data.task_id;
+                addProgressItem(`✅ 任务已创建: ${currentTaskId}`);
+
+                // 订阅 SSE
+                eventSource = new EventSource(`/api/tasks/${currentTaskId}/stream`);
+
+                eventSource.addEventListener('connected', (e) => {
+                    const d = JSON.parse(e.data);
+                    addProgressItem('🔗 已连接到服务器');
+                    document.getElementById('statusBadge').textContent = '运行中';
+                });
+
+                eventSource.addEventListener('progress', (e) => {
+                    const d = JSON.parse(e.data);
+                    addProgressItem(d.message, d.stage === 'error' ? 'error' : 'info');
+                    document.getElementById('progressText').textContent = d.message;
+                });
+
+                eventSource.addEventListener('stream', (e) => {
+                    const d = JSON.parse(e.data);
+                    if (d.stage === 'outline') {
+                        updateStreamItem(d.accumulated);
+                    }
+                });
+
+                eventSource.addEventListener('result', (e) => {
+                    const d = JSON.parse(e.data);
+                    if (d.type === 'concepts') {
+                        addProgressItem(`🔍 识别到技术概念: ${d.data.concepts.join(', ')}`, 'success');
+                    } else if (d.type === 'metaphors') {
+                        addProgressItem(`💡 找到比喻: ${d.data.metaphors.join(', ')}`, 'success');
+                    } else if (d.type === 'outline_complete') {
+                        finishStream();
+                        addProgressItem(`📚 大纲完成: ${d.data.title} (${d.data.page_count} 页)`, 'success');
+                    } else if (d.type === 'page_content') {
+                        addProgressItem(`📖 第 ${d.data.page_number} 页: ${d.data.title}`, 'info');
+                    } else if (d.type === 'page_image') {
+                        addProgressItem(`🖼️ 第 ${d.data.page_number} 页配图已生成`, 'success');
+                    }
+                });
+
+                eventSource.addEventListener('complete', (e) => {
+                    const d = JSON.parse(e.data);
+                    addProgressItem('🎉 生成完成！', 'success');
+                    document.getElementById('statusBadge').textContent = '已完成';
+                    document.getElementById('progressText').textContent = '生成完成';
+                    
+                    // 显示结果
+                    displayResult(d.outputs);
+                    
+                    eventSource.close();
+                    eventSource = null;
+                });
+
+                eventSource.addEventListener('error', (e) => {
+                    if (e.data) {
+                        const d = JSON.parse(e.data);
+                        addProgressItem(`❌ 错误: ${d.message}`, 'error');
+                    }
+                    document.getElementById('statusBadge').textContent = '错误';
+                });
+
+                eventSource.onerror = () => {
+                    if (eventSource.readyState === EventSource.CLOSED) {
+                        addProgressItem('🔌 连接已关闭');
+                    }
+                };
+
+            } catch (error) {
+                addProgressItem(`❌ 请求失败: ${error.message}`, 'error');
+            }
+        });
+
+        // 显示结果
+        function displayResult(result) {
+            document.getElementById('resultTitle').textContent = result.title || '技术科普绘本';
+            document.getElementById('resultMeta').textContent = `${result.total_pages} 页 · ${result.core_metaphor || ''}`;
+
+            const pagesContainer = document.getElementById('resultPages');
+            pagesContainer.innerHTML = '';
+
+            (result.pages || []).forEach(page => {
+                const pageEl = document.createElement('div');
+                pageEl.className = 'page-item';
+                
+                // 构建标签
+                let tagsHtml = '<div class="page-tags">';
+                if (page.metaphor) tagsHtml += `<span class="page-tag metaphor">💡 ${page.metaphor}</span>`;
+                if (page.tech_point) tagsHtml += `<span class="page-tag tech">🔧 ${page.tech_point}</span>`;
+                if (page.real_world_example) tagsHtml += `<span class="page-tag example">🌍 ${page.real_world_example}</span>`;
+                tagsHtml += '</div>';
+                
+                // 构建要点总结
+                let takeawayHtml = '';
+                if (page.key_takeaway) {
+                    takeawayHtml = `<div class="page-takeaway">📌 <strong>要点：</strong>${page.key_takeaway}</div>`;
+                }
+                
+                pageEl.innerHTML = `
+                    <div class="page-header">
+                        <div class="page-number">${page.page_number}</div>
+                        <div class="page-title">${page.title}</div>
+                    </div>
+                    ${page.image_url ? `<div class="page-image"><img src="${page.image_url}" alt="${page.title}"></div>` : ''}
+                    <div class="page-content">${page.content}</div>
+                    ${tagsHtml}
+                    ${takeawayHtml}
+                `;
+                pagesContainer.appendChild(pageEl);
+            });
+
+            document.getElementById('resultSection').classList.add('show');
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
