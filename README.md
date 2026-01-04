@@ -32,7 +32,7 @@
 </div>
 
 
-
+# 项目名称
 ## 前言
 
 **一天时间，一本大模型技术教程，40+万字。**
@@ -90,7 +90,7 @@
 
 Banana Vibe Blog 应运而生，基于多 Agent 协作架构，自动完成调研、规划、写作、配图的全流程，让你专注于知识本身。
 
-## 👨‍💻 适用场景
+## 项目受众 
 
 1. **技术博主**：快速生成高质量技术科普文章，节省写作时间
 2. **技术布道者**：将复杂技术转化为通俗易懂的内容，扩大影响力
@@ -243,7 +243,7 @@ Banana Vibe Blog 应运而生，基于多 Agent 协作架构，自动完成调�
 | 8 | ✅ | 自定义知识源1+2期 | PDF/MD/TXT 解析 + 知识分块 + 图片摘要 |
 | 9 | ✅ | 技术书籍生成 | 系列博客聚合成完整书籍，参见 [大模型微调开源项目](https://lailoo.github.io/Hello-LLM-FineTuning/#/) |
 
-### 🚀 未来规划
+## 🚀 未来规划
 
 #### 📂 方向一：更多的输入源解析能力
 
@@ -512,16 +512,29 @@ banana-blog/
 | `KNOWLEDGE_CHUNK_OVERLAP` | 知识分块重叠 | 200 |
 
 
-## 🤝 贡献指南
+## 贡献者名单
 
-欢迎通过
-[Issue](https://github.com/lailoo/Banana-Vibe-Blog/issues)
-和
-[Pull Request](https://github.com/lailoo/Banana-Vibe-Blog/pulls)
-为本项目贡献力量！
+| 姓名 | 职责 | 简介 |
+| :----| :---- | :---- |
+| 刘磊 |  vibe-blog项目负责人 | 一枚后端在职 Coder，专注于AI技术学习与探索, 探索 AI+内容创作的无限可能, 热爱 Vibe, 崇尚分享 |
+
+*注：表头可自定义，但必须在名单中标明项目负责人*
+
+## 参与贡献
+
+- 如果你发现了一些问题，可以提Issue进行反馈，如果提完没有人回复你可以联系[保姆团队](https://github.com/datawhalechina/DOPMC/blob/main/OP.md)的同学进行反馈跟进~
+- 如果你想参与贡献本项目，可以提Pull request，如果提完没有人回复你可以联系[保姆团队](https://github.com/datawhalechina/DOPMC/blob/main/OP.md)的同学进行反馈跟进~
+- 如果你对 Datawhale 很感兴趣并想要发起一个新的项目，请按照[Datawhale开源项目指南](https://github.com/datawhalechina/DOPMC/blob/main/GUIDE.md)进行操作即可~
 
 
-## 📄 许可证
+## 关注我们
 
-本项目采用 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) 许可证。
+<div align=center>
+<p>扫描下方二维码关注公众号：Datawhale</p>
+<img src="https://raw.githubusercontent.com/datawhalechina/pumpkin-book/master/res/qrcode.jpeg" width = "180" height = "180">
+</div>
 
+
+## LICENSE
+
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="知识共享许可协议" style="border-width:0" src="https://img.shields.io/badge/license-CC%20BY--NC--SA%204.0-lightgrey" /></a><br />本作品采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议</a>进行许可。
