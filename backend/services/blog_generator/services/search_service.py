@@ -100,9 +100,9 @@ class SearchService:
                 "search_recency_filter": recency_filter
             }
             
-            logger.info(f"调用智谱 Web Search API: {query}")
-            logger.info(f"API URL: {url}")
-            logger.info(f"请求参数: {json.dumps(payload, ensure_ascii=False)}")
+            logger.info(f"🌐 使用智谱 Web Search 搜索: {query}")
+            logger.info(f"🌐 API URL: {url}")
+            logger.info(f"🌐 请求参数: {json.dumps(payload, ensure_ascii=False)}")
             
             response = requests.post(url, json=payload, headers=headers, timeout=30)
             logger.info(f"API 响应状态码: {response.status_code}")

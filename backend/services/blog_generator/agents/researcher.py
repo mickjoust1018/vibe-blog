@@ -219,9 +219,11 @@ class ResearcherAgent:
         document_knowledge = state.get('document_knowledge', [])
         has_document = bool(document_knowledge)
         
-        logger.info(f"开始收集素材: {topic}, 文档知识: {len(document_knowledge)} 条")
+        logger.info(f"🔍 开始收集素材: {topic}")
+        logger.info(f"📄 用户上传的文档知识: {len(document_knowledge)} 条")
         
         # 1. 执行网络搜索（保持原有逻辑）
+        logger.info(f"🌐 启动网络搜索...")
         search_results = self.search(topic, target_audience)
         
         # 2. 知识融合分支
@@ -257,7 +259,8 @@ class ResearcherAgent:
             
         else:
             # ✅ 无文档 → 完全走原有逻辑，零改动
-            logger.info("使用原有搜索模式（无文档上传）")
+            logger.info("📋 使用原有搜索模式（无文档上传）")
+            logger.info(f"📋 将使用网络搜索结果生成博客内容")
             summary = self.summarize(
                 topic=topic,
                 search_results=search_results,
@@ -283,7 +286,7 @@ class ResearcherAgent:
         ]
         
         stats = state['knowledge_source_stats']
-        logger.info(f"素材收集完成: 文档知识 {stats['document_count']} 条, "
+        logger.info(f"✅ 素材收集完成: 文档知识 {stats['document_count']} 条, "
                     f"网络搜索 {stats['web_count']} 条, 核心概念 {len(state['key_concepts'])} 个")
         
         return state
