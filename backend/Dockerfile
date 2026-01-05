@@ -30,5 +30,6 @@ ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 
 # 启动应用（使用 Gunicorn）
-# timeout 设置为 600 秒（10分钟），因为博客生成任务需要较长时间
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--worker-class", "sync", "--timeout", "6000", "--access-logfile", "-", "--error-logfile", "-", "app:create_app()"]
+# workers=1 + threads=4: 单进程多线程，确保任务状态共享，支持4个并发请求
+# timeout=600: 博客生成任务需要较长时间
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--threads", "4", "--worker-class", "gthread", "--timeout", "600", "--access-logfile", "-", "--error-logfile", "-", "app:create_app()"]
