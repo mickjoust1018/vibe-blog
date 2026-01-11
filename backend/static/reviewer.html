@@ -14,6 +14,8 @@
     <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/javascript.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/bash.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/languages/json.min.js"></script>
+    <!-- Mermaid 图表渲染 -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -920,7 +922,23 @@
         let eventSource = null;
         
         // 页面加载时获取教程列表
-        document.addEventListener('DOMContentLoaded', loadTutorials);
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化 Mermaid
+            if (typeof mermaid !== 'undefined') {
+                mermaid.initialize({
+                    startOnLoad: false,
+                    theme: 'default',
+                    securityLevel: 'loose',
+                    suppressErrorRendering: true,
+                    flowchart: { 
+                        useMaxWidth: true, 
+                        htmlLabels: true,
+                        curve: 'basis'
+                    }
+                });
+            }
+            loadTutorials();
+        });
         
         async function loadTutorials() {
             try {
@@ -1421,10 +1439,68 @@
             
             container.innerHTML = html;
             
-            // 代码高亮
+            // 先渲染 Mermaid 图表（在代码高亮之前）
+            renderMermaidDiagrams(container);
+            
+            // 代码高亮（跳过已转换的 mermaid）
             container.querySelectorAll('pre code').forEach(function(block) {
                 hljs.highlightElement(block);
             });
+        }
+        
+        // 渲染 Mermaid 图表
+        function renderMermaidDiagrams(container) {
+            // 查找所有 mermaid 代码块
+            container.querySelectorAll('pre code.language-mermaid, pre code.hljs.language-mermaid').forEach(function(block) {
+                const pre = block.parentElement;
+                const code = block.textContent;
+                
+                // 创建 mermaid 容器
+                const mermaidDiv = document.createElement('div');
+                mermaidDiv.className = 'mermaid';
+                mermaidDiv.textContent = code;
+                
+                // 替换 pre 元素
+                pre.parentNode.replaceChild(mermaidDiv, pre);
+            });
+            
+            // 也处理没有语言标记但内容是 mermaid 的代码块
+            container.querySelectorAll('pre code').forEach(function(block) {
+                const code = block.textContent.trim();
+                // 检测是否是 mermaid 语法
+                if (code.match(/^(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|journey|gantt|pie|gitGraph|mindmap|timeline)\s/i) ||
+                    code.match(/^(graph|flowchart)\s+(TB|BT|RL|LR|TD)/i)) {
+                    const pre = block.parentElement;
+                    const mermaidDiv = document.createElement('div');
+                    mermaidDiv.className = 'mermaid';
+                    mermaidDiv.textContent = code;
+                    pre.parentNode.replaceChild(mermaidDiv, pre);
+                }
+            });
+            
+            // 重新初始化 mermaid
+            if (typeof mermaid !== 'undefined') {
+                const mermaidNodes = container.querySelectorAll('.mermaid');
+                console.log('找到 mermaid 节点:', mermaidNodes.length);
+                
+                mermaidNodes.forEach(async function(node, index) {
+                    const code = node.textContent.trim();
+                    console.log('Mermaid 代码 #' + index + ':', code.substring(0, 100));
+                    
+                    try {
+                        // 使用 mermaid.render 单独渲染每个图表
+                        const id = 'mermaid-' + Date.now() + '-' + index;
+                        const { svg } = await mermaid.render(id, code);
+                        node.innerHTML = svg;
+                        console.log('Mermaid #' + index + ' 渲染成功');
+                    } catch (e) {
+                        console.warn('Mermaid #' + index + ' 渲染失败:', e.message || e);
+                        // 渲染失败时显示原始代码（带样式）
+                        node.innerHTML = '<pre style="background: #f8f9fa; padding: 16px; border-radius: 8px; overflow-x: auto; border: 1px solid #dee2e6; font-size: 13px; line-height: 1.5;"><code style="color: #495057;">' + escapeHtml(code) + '</code></pre>';
+                        node.className = 'mermaid-fallback';
+                    }
+                });
+            }
         }
         
         function scrollToIssue(index) {
