@@ -820,6 +820,9 @@ def create_app(config_class=None):
             source_material = data.get('source_material', None)
             document_ids = data.get('document_ids', [])  # 新增：文档 ID 列表
             
+            # 记录请求信息
+            logger.info(f"📝 博客生成请求: topic={topic}, article_type={article_type}, target_audience={target_audience}, target_length={target_length}, document_ids={document_ids}")
+            
             # 检查博客生成服务
             blog_service = get_blog_service()
             if not blog_service:

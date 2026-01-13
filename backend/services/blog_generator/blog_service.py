@@ -227,9 +227,8 @@ class BlogService:
                 document_knowledge=document_knowledge or []
             )
             
-            # 添加取消检查函数到 state，供各 Agent 使用
-            if task_manager:
-                initial_state['_is_cancelled_func'] = lambda: task_manager.is_cancelled(task_id)
+            # 注意：不要将函数放入 state，会导致 LangGraph checkpoint 序列化失败
+            # 取消检查已在主循环中处理 (line 272)
             
             # 设置大纲流式回调到 generator 实例
             def on_outline_stream(delta, accumulated):
